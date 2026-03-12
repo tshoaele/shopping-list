@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping List</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 16px;
+            padding-bottom: 80px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .items-list {
+            padding: 16px;
+        }
+        
+        .item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .item:last-child {
+            border-bottom: none;
+        }
+        
+        .item-name {
+            flex: 1;
+            font-size: 16px;
+            color: #1f2937;
+            padding-right: 8px;
+        }
+        
+        .item-name-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-right: 8px;
+        }
+        
+        .item-name-input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+        
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+        
+        .delete-btn:active {
+            background: #dc2626;
+        }
+        
+        .add-item-section {
+            padding: 16px;
+            border-top: 2px solid #e5e7eb;
+        }
+        
+        .add-item-btn {
+            width: 100%;
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .add-item-btn:active {
+            background: #059669;
+        }
+        
+        .price-input {
+            width: 100px;
+            padding: 8px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: right;
+            transition: border-color 0.2s;
+        }
+        
+        .price-input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+        
+        .total-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1f2937;
+            color: white;
+            padding: 20px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .total-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .total-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .total-label {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .total-amount {
+            font-size: 24px;
+            font-weight: 700;
+            color: #10b981;
+        }
+        
+        .split-label {
+            font-size: 16px;
+            font-weight: 500;
+            color: #9ca3af;
+        }
+        
+        .split-amount {
+            font-size: 20px;
+            font-weight: 600;
+            color: #60a5fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Shopping List</h1>
+        </div>
+        
+        <div class="items-list" id="itemsList"></div>
+        
+        <div class="add-item-section">
+            <button class="add-item-btn" onclick="addNewItem()">+ Add Item</button>
+        </div>
+    </div>
+    
+    <div class="total-bar">
+        <div class="total-content">
+            <div class="total-row">
+                <span class="total-label">Total:</span>
+                <span class="total-amount">R <span id="totalAmount">0.00</span></span>
+            </div>
+            <div class="total-row">
+                <span class="split-label">Split by 3:</span>
+                <span class="split-amount">R <span id="splitAmount">0.00</span></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let items = [
+            "Apples",
+            "Bananas",
+            "Green pepper",
+            "Juice box (Rhodes) - 4",
+            "Yoghurt - 4",
+            "Sugar",
+            "Small Jacob's coffee",
+            "Nuggets",
+            "Frozen chips",
+            "Milk 6 pack",
+            "Eggs 30 extra large",
+            "Maize meal 2.5kg",
+            "Peanut butter",
+            "Lucky Star tin fish - 2",
+            "Futurelife 2 big packs 1.5kg",
+            "Soup packets 3 (do not buy brown onion flavour)"
+        ];
+
+        const itemsList = document.getElementById('itemsList');
+        const totalAmountEl = document.getElementById('totalAmount');
+        const splitAmountEl = document.getElementById('splitAmount');
+
+        function renderItems() {
+            itemsList.innerHTML = '';
+            items.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'item';
+                
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.className = 'item-name-input';
+                nameInput.value = item;
+                nameInput.id = `name-${index}`;
+                nameInput.addEventListener('input', (e) => updateItemName(index, e.target.value));
+                
+                const priceInput = document.createElement('input');
+                priceInput.type = 'number';
+                priceInput.step = '0.01';
+                priceInput.className = 'price-input';
+                priceInput.placeholder = 'R 0.00';
+                priceInput.id = `price-${index}`;
+                priceInput.addEventListener('input', calculateTotal);
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.onclick = () => deleteItem(index);
+                
+                itemDiv.appendChild(nameInput);
+                itemDiv.appendChild(priceInput);
+                itemDiv.appendChild(deleteBtn);
+                itemsList.appendChild(itemDiv);
+            });
+        }
+
+        function updateItemName(index, newName) {
+            items[index] = newName;
+        }
+
+        function deleteItem(index) {
+            items.splice(index, 1);
+            renderItems();
+            calculateTotal();
+        }
+
+        function addNewItem() {
+            items.push('New item');
+            renderItems();
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            items.forEach((_, index) => {
+                const input = document.getElementById(`price-${index}`);
+                if (input) {
+                    const value = parseFloat(input.value) || 0;
+                    total += value;
+                }
+            });
+            totalAmountEl.textContent = total.toFixed(2);
+            splitAmountEl.textContent = (total / 3).toFixed(2);
+        }
+
+        renderItems();
+    </script>
+</body>
+</html>
